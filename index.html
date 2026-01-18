@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>프로젝트 관리</title>
+  <link rel="stylesheet" href="index.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-left">
+        <h1 class="title">프로젝트 관리</h1>
+        <p class="subtitle">파일을 체계적으로 관리하세요</p>
+        <p id="saveStatus" class="save-status" aria-live="polite"></p>
+      </div>
+
+      <div class="header-actions">
+        <button id="btnOpenUpload" class="btn btn-purple">
+          <i data-lucide="upload"></i>
+          업로드
+        </button>
+        <button id="btnExport" class="btn btn-green">
+          <i data-lucide="upload"></i>
+          내보내기
+        </button>
+
+        <label class="btn btn-blue file-label">
+          <i data-lucide="download"></i>
+          가져오기
+          <input id="inputImport" type="file" accept=".json" hidden />
+        </label>
+      </div>
+    </header>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="uploadTitle">
+      <div class="modal-card">
+        <h3 id="uploadTitle" class="modal-title">파일 업로드</h3>
+        <p class="modal-desc">모든 형식의 파일을 업로드할 수 있습니다.</p>
+        <input id="inputUpload" type="file" multiple class="modal-input" />
+        <button id="btnCloseUpload" class="btn btn-gray w-full">닫기</button>
+      </div>
+    </div>
+
+    <main class="grid">
+      <!-- Left: file list -->
+      <section class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">파일</h2>
+          <button id="btnToggleAdd" class="icon-btn" title="추가">
+            <i data-lucide="plus"></i>
+          </button>
+        </div>
+
+        <div class="search">
+          <i data-lucide="search" class="search-icon"></i>
+          <input id="searchTerm" type="text" placeholder="검색..." />
+        </div>
+
+        <div class="filters">
+          <select id="sortBy">
+            <option value="date">최신순</option>
+            <option value="name">이름순</option>
+            <option value="important">중요순</option>
+          </select>
+
+          <select id="filterCategory">
+            <option value="전체">모든 카테고리</option>
+          </select>
+
+          <select id="filterProject">
+            <option value="전체">모든 프로젝트</option>
+          </select>
+
+          <select id="filterStatus">
+            <option value="전체">모든 상태</option>
+            <option value="계획">계획</option>
+            <option value="진행중">진행중</option>
+            <option value="완료">완료</option>
+            <option value="보류">보류</option>
+            <option value="취소">취소</option>
+          </select>
+        </div>
+
+        <!-- Add form -->
+        <div id="addForm" class="add-form hidden">
+          <input id="newName" type="text" placeholder="파일명" />
+          <select id="newType"></select>
+          <input id="newCategory" type="text" placeholder="카테고리" />
+          <input id="newProject" type="text" placeholder="프로젝트" />
+          <input id="newTags" type="text" placeholder="태그 (쉼표로 구분)" />
+          <button id="btnAddFile" class="btn btn-primary w-full">추가</button>
+        </div>
+
+        <div id="fileList" class="file-list" role="list"></div>
+      </section>
+
+      <!-- Right: file detail -->
+      <section class="panel detail">
+        <div id="emptyState" class="empty">
+          <i data-lucide="file-code" class="empty-icon"></i>
+          <p>파일을 선택하세요</p>
+        </div>
+
+        <div id="detailView" class="hidden">
+          <div class="detail-head">
+            <div class="detail-title">
+              <h2 id="detailName"></h2>
+              <button id="btnToggleImportant" class="star-btn" title="중요 표시">
+                <i data-lucide="star"></i>
+              </button>
+            </div>
+
+            <button id="btnCopy" class="btn btn-light">
+              <i data-lucide="copy"></i>
+              <span id="copyText">복사</span>
+            </button>
+          </div>
+
+          <div class="meta-grid">
+            <div class="meta">
+              <i data-lucide="file"></i>
+              <span id="detailType"></span>
+            </div>
+            <div class="meta">
+              <i data-lucide="folder"></i>
+              <span id="detailCategory"></span>
+            </div>
+            <div class="meta">
+              <i data-lucide="calendar"></i>
+              <span id="detailDate"></span>
+            </div>
+            <div class="meta">
+              <i data-lucide="file"></i>
+              <span id="detailSize"></span>
+            </div>
+          </div>
+
+          <div id="projectBadge" class="badge hidden">
+            <span id="detailProject"></span>
+          </div>
+
+          <div class="block">
+            <label class="label">상태</label>
+            <div id="statusButtons" class="status-row"></div>
+          </div>
+
+          <div class="block">
+            <div class="block-head">
+              <label class="label">메모</label>
+              <div class="memo-actions">
+                <button id="btnEditMemo" class="icon-btn" title="메모 수정">
+                  <i data-lucide="edit-2"></i>
+                </button>
+                <div id="memoEditActions" class="hidden">
+                  <button id="btnSaveMemo" class="icon-btn ok" title="저장">
+                    <i data-lucide="save"></i>
+                  </button>
+                  <button id="btnCancelMemo" class="icon-btn danger" title="취소">
+                    <i data-lucide="x"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <p id="memoView" class="memo-view"></p>
+            <textarea id="memoEdit" class="memo-edit hidden" rows="2"></textarea>
+          </div>
+
+          <div class="block">
+            <label class="label">코드</label>
+            <textarea id="codeArea" class="code" placeholder="코드 입력..."></textarea>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Stats -->
+    <section class="stats">
+      <div class="stat">
+        <p class="stat-label">전체</p>
+        <p id="statAll" class="stat-value"></p>
+      </div>
+      <div class="stat">
+        <p class="stat-label">계획</p>
+        <p id="statPlan" class="stat-value"></p>
+      </div>
+      <div class="stat">
+        <p class="stat-label">진행중</p>
+        <p id="statDoing" class="stat-value"></p>
+      </div>
+      <div class="stat">
+        <p class="stat-label">완료</p>
+        <p id="statDone" class="stat-value"></p>
+      </div>
+      <div class="stat">
+        <p class="stat-label">보류/취소</p>
+        <p id="statHoldCancel" class="stat-value"></p>
+      </div>
+    </section>
+  </div>
+
+  <script src="index.js"></script>
+</body>
+</html>
